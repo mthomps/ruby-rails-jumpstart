@@ -53,11 +53,11 @@ def play_game(limit)
 
   until found
     guess = ask(limit)
-    isLieing = (rand(100) < 25)
+    is_lieing = (rand(100) < 25)
     
-    if (guess < chosen) or (guess > chosen and isLieing)
+    if (guess < chosen) or (guess > chosen and is_lieing)
       say "WRONG:too low"
-    elsif (guess > chosen) or (guess < chosen and isLieing)
+    elsif (guess > chosen) or (guess < chosen and is_lieing)
       say "WRONG:too high"
     else
       found = true

@@ -10,8 +10,8 @@ status =
   
     finished = false                                # we're just getting started!
     i = limit/2                                     # let's start with an efficient guess
-    guessCeiling = limit                            # initial highest possible answer
-    guessFloor = 1                                  # initial lowest possible answer
+    guess_ceiling = limit                           # initial highest possible answer
+    guess_floor = 1                                 # initial lowest possible answer
     
     until finished || (i > limit)                   # keep looping until we're done
       inline = child_stdout.readline.strip          # get input from the game process
@@ -29,15 +29,15 @@ status =
       finished = response.match(/:exiting/)         # if the response includes ':exiting', we're done
       
       # set the ceiling/floor based on response; check for lies:
-      if response.include?("too high") and (i > guessFloor) 
-        guessCeiling = i - 1
-      elsif (response.include?("too low")) and (i < guessCeiling)
-        guessFloor = i + 1
+      if response.include?("too high") and (i > guess_floor) 
+        guess_ceiling = i - 1
+      elsif (response.include?("too low")) and (i < guess_ceiling)
+        guess_floor = i + 1
       elsif !(response.include?("CORRECT"))
         puts "You're a liar! I quit!"               # the answer is outside the floor/ceiling? No.
         exit
       end
-      i = (guessCeiling + guessFloor)/2             # guess the midpoint
+      i = (guess_ceiling + guess_floor)/2           # guess the midpoint
     end
     puts ">>> exitstatus : #{ wait_thr.value }"
   end
