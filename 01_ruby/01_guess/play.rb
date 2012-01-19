@@ -33,7 +33,7 @@ status =
         guess_ceiling = i - 1
       elsif (response.include?("too low")) and (i < guess_ceiling)
         guess_floor = i + 1
-      elsif !(response.include?("CORRECT"))
+      elsif !response.include?("CORRECT")
         puts "You're a liar! I quit!"               # the answer is outside the floor/ceiling? No.
         exit
       end
