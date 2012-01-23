@@ -5,7 +5,7 @@ require 'sinatra/base'
 require 'json'
 require 'roxml'
 require 'yaml'
-
+require 'lingua/stemmer'
 
 class ExampleServer < Sinatra::Base
   CONTENT_TYPES = {
@@ -34,8 +34,26 @@ class ExampleServer < Sinatra::Base
       raise 'Unknown format: ' + format
     end
   end
+  
+  #
+  # helper method that takes a string and returns the piglatin translation
+  #
+  def piglatin(word)
+    suffix = word[0] + "ay"
+    word.slice!(0)
+    word + suffix
+  end
 
   #
+  # helper method that takes a string and returns the stem using
+  # ruby-stemmer
+  # FIXME: not implemented right? the ruby-stemmer gem only returns 1 string
+  #
+  def stem(word)
+    stemmer = Lingua::Stemmer.new
+    stemmer.stem params[:message]
+  end
+  
   # a basic time service, a la:
   # http://localhost:4567/time.txt (or .xml or .json or .yaml)
   #
@@ -61,46 +79,42 @@ class ExampleServer < Sinatra::Base
     params[:message]
   end
 
-  # FIXME #1: implement reverse service that reverses the message
+  # displays the reverses of the given message
   get '/reverse/:message' do
     content_type 'text/plain', :charset => 'utf-8'
-    params[:message]
+    params[:message].reverse!
   end
 
-  # FIXME #1: implement reverse service that reverses the message
+  # displays the reverses of the given message
   get '/reverse' do
     content_type 'text/plain', :charset => 'utf-8'
-    params[:message]
+    params[:message].reverse!
   end
 
-  # FIXME #2: implement pig latin service that translates the message
-  # using the pig latin algorithm
+# displays the message translated into pig latin
   get '/piglatin/:message' do
     content_type 'text/plain', :charset => 'utf-8'
-    params[:message]
+    piglatin(params[:message])
   end
 
-  # FIXME #2: implement pig latin service that translates the message
-  # using the pig latin algorithm
+# displays the message translated into pig latin
   get '/piglatin' do
     content_type 'text/plain', :charset => 'utf-8'
-    params[:message]
+    piglatin(params[:message])
   end
 
-  # FIXME #3: implement snowball stemming service that translates the
-  # message into a comma-separated list of tokens using the snowball
-  # stemming algorithm
+  # translates the message into a comma-separated list of 
+  # tokens using the snowball stemming algorithm
   get '/snowball/:message' do
     content_type 'text/plain', :charset => 'utf-8'
-    params[:message]
+    stem(params[:mesage])
   end
 
-  # FIXME #3: implement snowball stemming service that translates the
-  # message into a comma-separated list of tokens using the snowball
-  # stemming algorithm
-  get '/piglatin' do
+  # translates the message into a comma-separated list of 
+  # tokens using the snowball stemming algorithm
+  get '/snowball' do
     content_type 'text/plain', :charset => 'utf-8'
-    params[:message]
+    stem(params[:message])
   end
 
   run! if app_file == $0
