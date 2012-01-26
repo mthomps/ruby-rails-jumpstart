@@ -12,6 +12,7 @@
 * supermodel
 * roxml
 * haml
+* pusher
 
 # Using Chrome Developer Tools
 
@@ -55,6 +56,7 @@ Diving Deeper
 * Step 1: (quick) Read http://rubydoc.info/gems/activemodel/3.1.3/frames
 * Step 2: (quick) Read https://github.com/maccman/supermodel/
 * Step 3: (medium) Learn https://github.com/maccman/supermodel/blob/master/lib/supermodel/base.rb
+* Step 4: (medium) Read about validations in Rails http://guides.rubyonrails.org/active_record_validations_callbacks.html
 
 Diving Deeper
 

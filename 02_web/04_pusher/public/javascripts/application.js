@@ -169,7 +169,7 @@
   };
 
   Pusher.channel_auth_endpoint = window.app.chat_path + '/pusher/auth';
-  var pusher = new Pusher('6f8ce27e0161fcccf990');
+  var pusher = new Pusher(pusherKey);
 
   //
   // WARNING: presence events are *very* flaky! we should
