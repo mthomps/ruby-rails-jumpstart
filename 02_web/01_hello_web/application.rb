@@ -14,12 +14,23 @@ class ExampleServer < Sinatra::Base
     'xml'  => 'text/xml',
     'json' => 'application/json'
   }
-
+  
+  # FIXME: duplicate code between the method pairs
+  # FIXME: figure out best way to parse format of request 
+  # and return result in that format
   #
   # helper method that takes a ruby object and returns a string
   # representation in the specified format
   #
-  def reformat(data, format=params[:format])
+=begin
+  def reformat(data)
+    # seems a bit unsafe/weird
+    format = params[:format] unless params[:format].nil?
+    if format.nil?
+      format = data[:message].split('.')[1]
+      data[:message] = data[:message].split('.')[0]
+    end
+    format = "json" if format.nil?
     content_type CONTENT_TYPES[format], :charset => 'utf-8'
     case format
     when 'txt'
@@ -34,6 +45,24 @@ class ExampleServer < Sinatra::Base
       raise 'Unknown format: ' + format
     end
   end
+=end
+
+  def reformat(data, format=params[:format])
+      content_type CONTENT_TYPES[format], :charset => 'utf-8'
+      case format
+      when 'txt'
+        data.to_s
+      when 'yaml'
+        YAML::dump(data)
+      when 'xml'
+        data.to_xml
+      when 'json'
+        data.to_json
+      else
+        raise 'Unknown format: ' + format
+      end
+    end
+    
   
   #
   # helper method that takes a string and returns the piglatin translation
@@ -47,11 +76,10 @@ class ExampleServer < Sinatra::Base
   #
   # helper method that takes a string and returns the stem using
   # ruby-stemmer
-  # FIXME: not implemented right? the ruby-stemmer gem only returns 1 string
   #
   def stem(word)
     stemmer = Lingua::Stemmer.new
-    stemmer.stem params[:message]
+    stemmer.stem word
   end
   
   # a basic time service, a la:
@@ -68,6 +96,7 @@ class ExampleServer < Sinatra::Base
   get '/echo/:message' do
     content_type 'text/plain', :charset => 'utf-8'
     params[:message]
+    #reformat({:message => params[:message]})
   end
 
   #
@@ -77,6 +106,7 @@ class ExampleServer < Sinatra::Base
   get '/echo' do
     content_type 'text/plain', :charset => 'utf-8'
     params[:message]
+    #reformat({:message => params[:message]})
   end
 
   # displays the reverses of the given message
@@ -94,27 +124,43 @@ class ExampleServer < Sinatra::Base
 # displays the message translated into pig latin
   get '/piglatin/:message' do
     content_type 'text/plain', :charset => 'utf-8'
-    piglatin(params[:message])
+    words = []
+    (params[:message]).split.each do |word|
+      words << piglatin(word) + " "
+    end
+    words
   end
 
 # displays the message translated into pig latin
   get '/piglatin' do
     content_type 'text/plain', :charset => 'utf-8'
-    piglatin(params[:message])
+    words = []
+    (params[:message]).split.each do |word|
+      words << piglatin(word) + " "
+    end
+    words
   end
 
   # translates the message into a comma-separated list of 
   # tokens using the snowball stemming algorithm
   get '/snowball/:message' do
     content_type 'text/plain', :charset => 'utf-8'
-    stem(params[:mesage])
+    stems = []
+    (params[:message]).split.each do |word|
+      stems << stem(word) + " "
+    end
+    stems
   end
 
   # translates the message into a comma-separated list of 
   # tokens using the snowball stemming algorithm
   get '/snowball' do
     content_type 'text/plain', :charset => 'utf-8'
-    stem(params[:message])
+    stems = []
+    (params[:message]).split.each do |word|
+      stems << stem(word) + " "
+    end
+    stems
   end
 
   run! if app_file == $0
