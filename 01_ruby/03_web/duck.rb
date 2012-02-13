@@ -1,6 +1,5 @@
 require 'open-uri'
 require 'json'
-require 'pp'
 
 api_url = ARGV.shift                   # get a query from the command line arguments
 unless api_url                         # exit if we don't get one

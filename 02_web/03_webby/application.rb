@@ -1,5 +1,6 @@
+
+require 'bundler/setup'
 require 'rubygems'
-require 'sinatra'
 require 'sinatra/base'
 require 'sinatra/respond_to'
 require 'padrino-helpers'

@@ -1,7 +1,8 @@
 
 # RESTFul Web Services using Sinatra
 
-* Run the script using "ruby application.rb"
+* Install dependencies using "ruby -S bundle install"
+* Run the script using "ruby -S bundle exec ruby application.rb"
 
 You should study the code for application.rb and get to know it well.
 
