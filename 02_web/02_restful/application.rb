@@ -11,8 +11,18 @@ require 'json'
 #
 class Idea < SuperModel::Base
   include SuperModel::RandomID
+  belongs_to :inventor
 end
 
+class Inventor < SuperModel::Base
+  # has_many :ideas ?
+  @@anonymous = Inventor.create(:name => "ANONYMOUS")
+  def self.anon
+    @@anonymous
+  end
+end
+
+  
 class RestfulServer < Sinatra::Base
   # helper method that returns json
   def json_out(data)
@@ -40,10 +50,29 @@ class RestfulServer < Sinatra::Base
   get '/ideas' do
     list_ideas
   end
+  
+  # obtain a list of all inventors
+  def list_inventors
+    json_out(Inventor.all)
+  end
 
+  # display the list of inventors
+  get '/inventors' do
+    list_inventors
+  end
   # create a new idea
+  # FIXME: If an inventor isn't given, assign the anonymous,
+  # if an inventor is given but is not stored yet, store it
   post '/ideas' do
-    idea = Idea.create!(JSON.parse(request.body.read))
+    jsonData = JSON.parse(request.body.read)
+    idea = Idea.create!(jsonData)
+    if idea.inventor.nil?
+      idea.inventor = Inventor.anon
+      idea.save
+    elsif !Inventor.exists?(jsonData[:inventor])
+      inventor = Inventor.create!(jsonData[:inventor])
+      inventor.save
+    end
     json_out(idea)
   end
 
@@ -81,5 +110,17 @@ class RestfulServer < Sinatra::Base
     "idea #{params[:id]} deleted\n"
   end
 
+  # delete an inventor
+  delete '/inventors/:id' do
+    unless Inventor.exists?(params[:id])
+      not_found
+      return
+    end
+
+    Idea.find(params[:id]).destroy
+    status 204
+    "idea #{params[:id]} deleted\n"
+  end
+  
   run! if app_file == $0
 end
