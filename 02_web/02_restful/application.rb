@@ -12,19 +12,20 @@ require 'json'
 #
 class Idea < SuperModel::Base
   include SuperModel::RandomID
+  attributes :category, :text
+  validates_presence_of :category, :text
   belongs_to :inventor
 end
 
+# find_by_attribute(inventorID)
 class Inventor < SuperModel::Base
-  # has_many :ideas ?
-  @@anonymous = Inventor.create(:name => "ANONYMOUS")
-  def self.anon
-    @@anonymous
-  end
+  attributes :name
+  validates :name, :presence => true, :uniqueness => true
 end
 
   
 class RestfulServer < Sinatra::Base
+  ANON = Inventor.create!(:name => "ANONYMOUS")
   # helper method that returns json
   def json_out(data)
     content_type 'application/json', :charset => 'utf-8'
@@ -37,6 +38,10 @@ class RestfulServer < Sinatra::Base
     body "not found\n"
   end
 
+  def bad_request
+    status 400
+    body "bad request\n"
+  end
   # obtain a list of all ideas
   def list_ideas
     json_out(Idea.all)
@@ -61,19 +66,53 @@ class RestfulServer < Sinatra::Base
   get '/inventors' do
     list_inventors
   end
+  
   # create a new idea
   # FIXME: If an inventor isn't given, assign the anonymous,
   # if an inventor is given but is not stored yet, store it
   post '/ideas' do
     jsonData = JSON.parse(request.body.read)
-    idea = Idea.create!(jsonData)
-    if idea.inventor.nil?
-      idea.inventor = Inventor.anon
-      idea.save
-    elsif !Inventor.exists?(jsonData[:inventor])
-      inventor = Inventor.create!(jsonData[:inventor])
-      inventor.save
+    givenInv = jsonData["inventor"]
+
+    # If no inventor is given, assign the anon inventor
+    if givenInv.nil?
+      inv = ANON
+      
+    # Check the id and name of the given inventor
+    else
+      # If the inventor is given and it already is stored, associate it
+      # If only contains name, if it doesn't exist, create one
+      if Inventor.exists?(givenInv["id"])
+        # The inventor id exists, associate it
+        inv = Inventor.find(givenInv["id"])
+        
+      elsif !Inventor.find_by_name(givenInv["name"]).nil?
+        # The inventor name exists, associate it
+        inv = Inventor.find_by_name(givenInv["name"])
+      
+      else
+        # The inventor was given and does not exist, create it
+        inv = Inventor.new(givenInv)
+        begin
+          inv.save!
+        rescue
+          puts "Failed to save inventor, no name"
+          bad_request
+        end
+      end
     end
+    
+    jsonData.delete("inventor")
+    
+      idea = Idea.new(jsonData)
+      idea.inventor = inv
+    begin
+      idea.save!
+    rescue
+      puts "Failed to save idea, no category/text"
+      bad_request
+    end
+
     json_out(idea)
   end
 
@@ -95,7 +134,12 @@ class RestfulServer < Sinatra::Base
     end
 
     idea = Idea.find(params[:id])
-    idea.update_attributes!(JSON.parse(request.body.read))
+    begin
+      idea.update_attributes!(JSON.parse(request.body.read))
+    rescue
+      puts "Failed to update idea, no category/text"
+      bad_request
+    end
     json_out(idea)
   end
 
@@ -121,6 +165,15 @@ class RestfulServer < Sinatra::Base
     Idea.find(params[:id]).destroy
     status 204
     "idea #{params[:id]} deleted\n"
+  end
+  
+  # delete all ideas and inventors
+  post '/nuke' do
+    password = params[:message]
+    if password == "yesireallymeanit"
+      Idea.destroy_all
+      Inventor.destroy_all
+    end
   end
   
   run! if app_file == $0
