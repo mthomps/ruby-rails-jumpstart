@@ -1,6 +1,7 @@
 
 - form_for @location, @action || "/locations", :method => :POST do |f|
   = csrf_tag
+  = f.error_messages
   %table{:align => :center}
     %tr
       %td= f.label :name, :caption => "Location Name:"
@@ -19,4 +20,3 @@
       %td
         = f.submit
         = link_to 'Cancel', '/locations'
-

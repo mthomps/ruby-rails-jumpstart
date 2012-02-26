@@ -1,0 +1,19 @@
+
+
+#floater
+  %p
+    %b Name:
+    = @query.name
+
+  %p
+    %b Query:
+    = @query.text
+
+  %p
+    %b Results:
+    = @query.results
+
+
+  = link_to 'Edit', "/duckduckgo/#{@query.id}/edit"
+  %span &nbsp;
+  = link_to 'Back', "/duckduckgo"
