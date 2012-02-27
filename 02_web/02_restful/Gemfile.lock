@@ -9,6 +9,7 @@ GEM
     builder (2.1.2)
     i18n (0.5.0)
     json (1.6.5)
+    people_places_things (2.5.0)
     rack (1.4.1)
     rack-protection (1.2.0)
       rack
@@ -27,5 +28,6 @@ DEPENDENCIES
   activemodel
   activesupport
   json
+  people_places_things
   sinatra
   supermodel
