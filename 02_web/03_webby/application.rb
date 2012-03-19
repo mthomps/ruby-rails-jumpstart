@@ -23,7 +23,7 @@ end
 
 class Query < SuperModel::Base
   include SuperModel::RandomID
-  attributes :name, :text
+  attributes :name, :text, :results
   validates :name, :text, :presence => true
 end
 
@@ -82,11 +82,13 @@ class Webby < Sinatra::Base
   end
 
   post '/locations/?' do
+    puts "posting a location"
     begin
+      #new location, check location, save &redirect if valid
       @location = Location.create!(params[:location])
       redirect to('/locations/' + @location.id)
     rescue Exception => e
-      "post broke"
+      puts "loc post broke"
       puts e
     end
   end
@@ -96,9 +98,8 @@ class Webby < Sinatra::Base
       begin
         @location.update_attributes!(params[:location])
         redirect to('/locations/' + @location.id)
-        haml :'locations/index', :layout => :application
       rescue Exception => e
-        puts "update broke"
+        puts "loc update broke"
         puts e
       end
     end
@@ -149,6 +150,7 @@ class Webby < Sinatra::Base
   end
 
   post '/duckduckgo/?' do
+    puts "Posting a query!"
     begin
       @query = Query.create!(params[:query])
       redirect to('/duckduckgo/' + @query.id)
@@ -163,7 +165,6 @@ class Webby < Sinatra::Base
       begin
         @query.update_attributes!(params[:query])
         redirect to('/duckduckgo/' + @query.id)
-        haml :'duckduckgo/index', :layout => :application
       rescue Exception => e
         puts "Update broke"
         puts e
